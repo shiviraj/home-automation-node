@@ -1,33 +1,29 @@
 #ifndef HOME_SERVICE_HPP
 #define HOME_SERVICE_HPP
 
-#include <gateway/HomeAutomationGateway.hpp>
-#include <ws/WebSocket.hpp>
-#include <utils/WebResponse.hpp>
+#include <service/MQTTService.hpp>
+#include <service/PinService.hpp>
 
 class HomeService
 {
 private:
-    HomeAutomationGateway homeAutomationGateway;
-    WebSocket websocket;
+    MQTTService *mqttService;
+    PinService *pinService;
+    String node;
+    Logger logger;
+    MQTTCallback callback();
 
 public:
-    HomeService(std::string node)
-    {
-        (*this).homeAutomationGateway = HomeAutomationGateway(node);
-        (*this).websocket = WebSocket(node);
-    }
+    HomeService();
+    HomeService(MQTTService &mqttService, PinService &pinService, String node);
 
-    void init()
-    {
-        WebResponse response = homeAutomationGateway.getPinMapping();
-        if (response.error)
-        {
-            
-        }
-    }
+    HomeService &setMQTTService(MQTTService &mqttService);
+    HomeService &setPinService(PinService &pinService);
+    MQTTService &setClient(PubSubClient &client);
 
-    void loop() {}
+    HomeService &init(String topics[], unsigned int length);
+
+    void loop();
 };
 
 #endif

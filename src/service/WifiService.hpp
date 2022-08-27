@@ -1,20 +1,19 @@
 #ifndef WIFI_SERVICE_HPP
 #define WIFI_SERVICE_HPP
 
-#include <iostream>
-#include <string>
-
 #include <ESP8266WiFi.h>
-#include <DNSServer.h>
 #include <ESP8266WebServer.h>
+#include <DNSServer.h>
 #include <WiFiManager.h>
 #include <logger/Logger.hpp>
 
-void wifiInit(std::string node)
+Logger logger;
+
+void wifiInit(String node)
 {
     WiFiManager wifiManager;
     wifiManager.autoConnect(node.c_str());
-    info((char *)"connected...");
+    logger.info((char *)"connected...");
 }
 
 #endif

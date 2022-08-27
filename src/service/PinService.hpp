@@ -1,74 +1,35 @@
 #ifndef PIN_SERVICE_HPP
 #define PIN_SERVICE_HPP
 
-#include <Arduino.h>
 #include <list>
 #include <iterator>
-#include <domain/Pin.hpp>
+#include <Arduino.h>
+#include <logger/Logger.hpp>
 
 using namespace std;
 
 class PinService
 {
 private:
-    list<Pin> pins;
-    char *RESTART = "RESTART";
+    list<String> devices;
+    Logger logger;
 
 public:
-    PinService() {}
-
-    PinService(list<Pin> pins)
-    {
-        (*this).pins = pins;
-    }
-
-    int set_pinmode()
-    {
-        list<Pin>::iterator it;
-        for (it = pins.begin(); it != pins.end(); ++it)
-        {
-            Pin pin = *it;
-            int type = pin.type == "INPUT" ? INPUT : OUTPUT;
-            pinMode(pin.no, type);
-            delay(100);
-        }
-        return pins.size();
-    }
-
-    void restart()
-    {
-        write(RESTART, HIGH);
-    }
+    PinService();
+    void addDevices(String devices);
+    // void updateValue(String device);
 
 private:
-    Pin find(char *name)
-    {
-        list<Pin>::iterator it;
-        for (it = pins.begin(); it != pins.end(); ++it)
-        {
-            Pin pin = *it;
-            if (pin.name == name)
-            {
-                return pin;
-            }
-        }
-        return Pin();
-    }
-
-    int read(char *name)
-    {
-        Pin pin = find(name);
-        auto readPin = pin.is_digital ? digitalRead : analogRead;
-        return readPin(pin.no);
-    }
-
-    void write(char *name, int value)
-    {
-        Pin pin = find(name);
-        if (pin.is_digital)
-            return digitalWrite(pin.no, value);
-        analogWrite(pin.no, value);
-    }
+    // int findIndexById(String id);
+    void setPinMode(String device);
+    void write(String device);
+    // int read(String device);
+    String getId(String device);
+    int getMode(String device);
+    int getType(String device);
+    int getNumber(String device);
+    int getPin(String device);
+    int getValue(String device);
 };
 
 #endif

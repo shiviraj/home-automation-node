@@ -1,25 +1,19 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include <iostream>
-#include <string>
-#include <Arduino.h>
+#include <HardwareSerial.h>
 
-using namespace std;
-
-void begin(int baudrate)
+class Logger
 {
-    Serial.begin(baudrate);
+private:
+    int baudrate;
+    void begin();
+
+public:
+    Logger();
+    Logger(int baudrate);
+    void info(String message);
+    void error(String message);
 };
-
-void info(string message)
-{
-    Serial.println("{ \"label\": \"INFO\", \"message\":\"" + String(message.c_str()) + "\"}");
-}
-
-void error(string message)
-{
-    Serial.println("{ \"label\": \"ERROR\", \"errorMessage\":\"" + String(message.c_str()) + "\"}");
-}
 
 #endif
