@@ -9,9 +9,10 @@ MQTTService::MQTTService()
     this->password = "";
 }
 
-MQTTService::MQTTService(PubSubClient &client, String host, int port, String username, String password)
+MQTTService::MQTTService(String node, PubSubClient &client, String host, int port, String username, String password)
 {
     setClient(client);
+    this->node = node;
     this->host = host;
     this->port = port;
     this->username = username;
@@ -52,9 +53,10 @@ bool MQTTService::publish(String topic)
     return publish(topic, "");
 }
 
-bool MQTTService::publish(String topic, String message)
+bool MQTTService::publish(String topicName, String message)
 {
-    logger.info("Published topic " + topic);
+    String topic = node + "/" + topicName;
+    logger.info("Published topic: " + topic + " message: " + message);
     return client->publish(topic.c_str(), message.c_str());
 }
 

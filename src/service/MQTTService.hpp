@@ -10,7 +10,7 @@ class MQTTService
 {
 private:
     PubSubClient *client;
-    String host;
+    String host, node;
     int port;
     String username;
     String password;
@@ -18,7 +18,7 @@ private:
 
 public:
     MQTTService();
-    MQTTService(PubSubClient &client, String host, int port, String username, String password);
+    MQTTService(String node, PubSubClient &client, String host, int port, String username, String password);
 
     MQTTService &setClient(PubSubClient &client);
 

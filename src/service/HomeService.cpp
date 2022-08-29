@@ -32,31 +32,41 @@ HomeService &HomeService::init(String topics[], unsigned int length)
     logger.info(result ? "MQTT Connected" : "MQTT not Connected");
     mqttService->subscribe(node, topics, length);
     delay(2000);
-    mqttService->publish(node + "/devices");
+    mqttService->publish("devices");
     return *this;
 }
 
 void HomeService::loop()
 {
     mqttService->loop(this->node);
+    pinService->updateState(*mqttService);
 }
 
 MQTTCallback HomeService::callback()
 {
-    return [&](char *topicName, uint8_t *payload, unsigned int length)
+    return [&](char *t, uint8_t *payload, unsigned int length)
     {
-        String topic = String(topicName).substring(this->node.length() + 1);
-
-        String message = "";
-        for (unsigned int i = 0; i < length; i++)
+        String topicName = String(t);
+        if (topicName.startsWith(this->node))
         {
-            message += char(payload[i]);
-        }
-        logger.info("Recieved topic " + topic);
+            String topic = topicName.substring(this->node.length() + 1);
+            logger.info("Recieved topic " + topic);
 
-        if (topic.equals("devices"))
-        {
-            pinService->addDevices(message);
+            String message = "";
+            for (unsigned int i = 0; i < length; i++)
+            {
+                message += char(payload[i]);
+            }
+
+            if (topic.equals("devices"))
+            {
+                pinService->addDevices(message);
+            }
+
+            if (topic.equals("update-state"))
+            {
+                pinService->updateState(message);
+            }
         }
     };
 }

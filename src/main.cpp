@@ -10,15 +10,15 @@ void setup()
     const int mqttPort = 1883;
     const String mqttUsername = "home-automation";
     const String mqttPassword = "Shiviraj";
-    String topics[] = {"devices"};
-    const int topicsLength = 1;
+    String topics[] = {"devices", "update-state"};
+    const int topicsLength = 2;
 
     wifiInit(node);
 
     WiFiClient wifiClient;
     PubSubClient client(wifiClient);
 
-    MQTTService mqttService(client, mqttHost, mqttPort, mqttUsername, mqttPassword);
+    MQTTService mqttService(node, client, mqttHost, mqttPort, mqttUsername, mqttPassword);
     PinService pinService;
 
     HomeService homeService(mqttService, pinService, node);
@@ -28,7 +28,7 @@ void setup()
     while (true)
     {
         homeService.loop();
-        delay(1000);
+        delay(10);
     }
 }
 

@@ -15,15 +15,22 @@ void PinService::addDevices(String allDevices)
         setPinMode(device);
         allDevices = allDevices.substring(endIndex + 1);
     }
-    logger.info("Succefully added devices count: " + String(this->devices.size()));
+    logger.info("Succefully added devices, count: " + String(this->devices.size()));
 }
 
-// // void PinService::updateValue(Device updatedDevice)
-// // {
-// //     Device device = *findDevice(updatedDevice.id);
-// //     device.updateValue(updatedDevice.value);
-// //     write(device);
-// // }
+void PinService::updateState(String updatedDevice)
+{
+    list<String>::iterator it;
+    String updatedDeviceId = getId(updatedDevice);
+    for (it = devices.begin(); it != devices.end(); ++it)
+    {
+        if (getId(*it).equals(updatedDeviceId))
+        {
+            *it = updateValue(*it, getValue(updatedDevice));
+            return write(*it);
+        }
+    }
+}
 
 void PinService::setPinMode(String device)
 {
@@ -32,20 +39,8 @@ void PinService::setPinMode(String device)
     pinMode(pin, mode);
     delay(10);
     write(device);
-    logger.info("Set pinmode of pin " + String(pin) + " mode " + (mode ? "OUTPUT" : "INPUT"));
+    logger.info("Setting mode at pin: " + String(pin) + " mode: " + (mode ? "OUTPUT" : "INPUT"));
 }
-
-// String PinService::findIndexById(String id)
-// {
-//     for (unsigned int i = 0; i < this->devices.size(); i++)
-//     {
-//         if (this->devices[i].startsWith(id))
-//         {
-//             return i;
-//         }
-//     }
-//     return -1;
-// };
 
 void PinService::write(String device)
 {
@@ -53,25 +48,24 @@ void PinService::write(String device)
     {
         int pin = this->getPin(device);
         int value = this->getValue(device);
+        logger.info("writing value at pin: " + String(pin) + " value: " + String(value));
         if (this->getType(device))
             return digitalWrite(pin, value);
         analogWrite(pin, value);
-        logger.info("write value to pin: " + String(pin) + " value: " + String(value));
     }
 }
 
-// int PinService::read(String device)
-// {
-//     if (!getMode(device))
-//     {
-//         int pin = getPin(device);
-//         logger.info("reading value of pin: " + String(pin));
-//         if (getType(device))
-//             return digitalRead(pin);
-//         return analogRead(pin);
-//     }
-//     return 0;
-// }
+int PinService::read(String device)
+{
+    if (!getMode(device))
+    {
+        int pin = getPin(device);
+        if (getType(device))
+            return digitalRead(pin);
+        return analogRead(pin);
+    }
+    return 0;
+}
 
 String PinService::getId(String device)
 {
@@ -88,11 +82,6 @@ int PinService::getType(String device)
     return device.substring(11, 12).toInt();
 }
 
-int PinService::getNumber(String device)
-{
-    return device.substring(13, 14).toInt();
-}
-
 int PinService::getPin(String device)
 {
     return device.substring(15, 17).toInt();
@@ -100,5 +89,34 @@ int PinService::getPin(String device)
 
 int PinService::getValue(String device)
 {
-    return device.substring(18).toInt();
+    return getValueString(device).toInt();
+}
+
+String PinService::getValueString(String device)
+{
+    return device.substring(18);
+}
+
+String PinService::updateValue(String device, int value)
+{
+    int lastIndex = device.lastIndexOf("/");
+    String deviceWithoutValue = device.substring(0, lastIndex + 1);
+    return deviceWithoutValue + value;
+}
+
+void PinService::updateState(MQTTService &mqttService)
+{
+    list<String>::iterator it;
+    for (it = devices.begin(); it != devices.end(); ++it)
+    {
+        if (!getMode(*it))
+        {
+            int value = read(*it);
+            if (value != getValue(*it))
+            {
+                *it = updateValue(*it, value);
+                mqttService.publish("update-state", *it);
+            }
+        }
+    }
 }
