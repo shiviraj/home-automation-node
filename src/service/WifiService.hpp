@@ -1,19 +1,23 @@
 #ifndef WIFI_SERVICE_HPP
 #define WIFI_SERVICE_HPP
 
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <DNSServer.h>
-#include <WiFiManager.h>
+#include <service/ConfigManager.hpp>
 #include <logger/Logger.hpp>
+#include <ESP8266WiFi.h>
 
-Logger logger;
-
-void wifiInit(String node)
+class WiFiService
 {
-    WiFiManager wifiManager;
-    wifiManager.autoConnect(node.c_str());
-    logger.info((char *)"connected...");
-}
+private:
+    ConfigManager *configManager;
+    Logger logger;
+    WiFiService &setConfigManager(ConfigManager &ConfigManager);
+
+public:
+    WiFiService();
+    WiFiService(ConfigManager &ConfigManager);
+    wl_status_t autoConnect();
+    void setupAP(String node);
+    bool connected();
+};
 
 #endif

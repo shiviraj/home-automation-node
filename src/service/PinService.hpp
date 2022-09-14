@@ -19,7 +19,8 @@ public:
     PinService();
     void addDevices(String devices);
     void updateState(String device);
-    void updateState(MQTTService &mqttService);
+    void updateInputDevicesState(MQTTService &mqttService);
+    void restart();
 
 private:
     void setPinMode(String device);

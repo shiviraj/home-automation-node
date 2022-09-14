@@ -13,6 +13,7 @@ public:
     Logger();
     Logger(int baudrate);
     void info(String message);
+    void infoF(String message);
     void error(String message);
 };
 

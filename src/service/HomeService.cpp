@@ -6,10 +6,11 @@ HomeService::HomeService()
     this->node = "";
 }
 
-HomeService::HomeService(MQTTService &mqttService, PinService &pinService, String node)
+HomeService::HomeService(MQTTService &mqttService, PinService &pinService, OTAService &otaService, String node)
 {
     setMQTTService(mqttService);
     setPinService(pinService);
+    setOTAService(otaService);
     this->node = node;
 }
 
@@ -25,21 +26,22 @@ HomeService &HomeService::setPinService(PinService &pinService)
     return *this;
 }
 
-HomeService &HomeService::init(String topics[], unsigned int length)
+HomeService &HomeService::setOTAService(OTAService &otaService)
 {
-    mqttService->init(this->callback());
-    bool result = mqttService->connect(this->node);
-    logger.info(result ? "MQTT Connected" : "MQTT not Connected");
-    mqttService->subscribe(node, topics, length);
-    delay(2000);
-    mqttService->publish("devices");
+    this->otaService = &otaService;
+    return *this;
+}
+
+HomeService &HomeService::init()
+{
+    mqttService->init(callback());
     return *this;
 }
 
 void HomeService::loop()
 {
     mqttService->loop(this->node);
-    pinService->updateState(*mqttService);
+    pinService->updateInputDevicesState(*mqttService);
 }
 
 MQTTCallback HomeService::callback()
@@ -66,6 +68,16 @@ MQTTCallback HomeService::callback()
             if (topic.equals("update-state"))
             {
                 pinService->updateState(message);
+            }
+
+            if (topic.equals("ota-update"))
+            {
+                otaService->enable();
+            }
+
+            if (topic.equals("restart"))
+            {
+                pinService->restart();
             }
         }
     };

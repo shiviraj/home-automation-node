@@ -28,6 +28,7 @@ public:
     bool connect(String id);
     bool publish(String topic);
     bool publish(String topic, String message);
+    bool connected();
 
     void subscribe(String node, String topics[], unsigned int length);
 };

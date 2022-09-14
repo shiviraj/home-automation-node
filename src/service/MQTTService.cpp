@@ -34,18 +34,24 @@ MQTTService &MQTTService::init(MQTTCallback callback)
 
 bool MQTTService::connect(String id)
 {
-    logger.info("connecting with MQTT...");
-    return client->connect(id.c_str(), username.c_str(), password.c_str());
+    if (!connected())
+    {
+        logger.info("connecting with MQTT...");
+        delay(10000);
+        bool status = client->connect(id.c_str(), username.c_str(), password.c_str());
+        logger.info(status ? "Successfully connected with MQTT" : "Failed to connect with MQTT");
+    }
+    return connected();
 }
 
 void MQTTService::loop(String id)
 {
-    while (!client->connected())
-    {
-        delay(1000);
-        connect(id);
-    }
     client->loop();
+}
+
+bool MQTTService::connected()
+{
+    return client->connected();
 }
 
 bool MQTTService::publish(String topic)

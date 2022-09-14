@@ -104,19 +104,24 @@ String PinService::updateValue(String device, int value)
     return deviceWithoutValue + value;
 }
 
-void PinService::updateState(MQTTService &mqttService)
+void PinService::updateInputDevicesState(MQTTService &mqttService)
 {
     list<String>::iterator it;
     for (it = devices.begin(); it != devices.end(); ++it)
     {
-        if (!getMode(*it))
+        String device = *it;
+        if (getMode(device) == INPUT && read(device) != getValue(device))
         {
-            int value = read(*it);
-            if (value != getValue(*it))
-            {
-                *it = updateValue(*it, value);
-                mqttService.publish("update-state", *it);
-            }
+            int value = read(device);
+            *it = updateValue(device, value);
+            mqttService.publish("update-state", *it);
         }
     }
+}
+
+void PinService::restart()
+{
+    logger.info("Restarting the node");
+    delay(5000);
+    ESP.restart();
 }

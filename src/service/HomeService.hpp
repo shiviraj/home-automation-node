@@ -3,25 +3,28 @@
 
 #include <service/MQTTService.hpp>
 #include <service/PinService.hpp>
+#include <service/OTAService.hpp>
 
 class HomeService
 {
 private:
     MQTTService *mqttService;
     PinService *pinService;
+    OTAService *otaService;
     String node;
     Logger logger;
     MQTTCallback callback();
 
 public:
     HomeService();
-    HomeService(MQTTService &mqttService, PinService &pinService, String node);
+    HomeService(MQTTService &mqttService, PinService &pinService, OTAService &otaService, String node);
 
     HomeService &setMQTTService(MQTTService &mqttService);
     HomeService &setPinService(PinService &pinService);
-    MQTTService &setClient(PubSubClient &client);
+    HomeService &setClient(PubSubClient &client);
+    HomeService &setOTAService(OTAService &otaService);
 
-    HomeService &init(String topics[], unsigned int length);
+    HomeService &init();
 
     void loop();
 };
