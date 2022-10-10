@@ -36,5 +36,5 @@ void WiFiService::setupAP(String node)
 
 bool WiFiService::connected()
 {
-    return WiFi.waitForConnectResult() == WL_CONNECTED;
+    return WiFi.waitForConnectResult(10000) == WL_CONNECTED;
 }

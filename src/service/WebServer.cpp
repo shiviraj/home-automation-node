@@ -26,7 +26,7 @@ void WebServer::restartDeviceAfter5Min()
     if (millis() - this->startedAt > 300000)
     {
         logger.info("Restarting node, there is no intraction done in setup mode...");
-        // delay(5000);
+        delay(5000);
         ESP.restart();
     }
 }

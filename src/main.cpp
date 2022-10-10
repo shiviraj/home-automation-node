@@ -33,6 +33,19 @@ void setup()
     homeService.init();
     mqttService.connect(node);
 
+    for (unsigned int i = 0; i < 5; i++)
+    {
+        if (!wifiService.connected())
+        {
+            wifiService.autoConnect();
+        }
+        if (wifiService.connected() && !mqttService.connected())
+        {
+            mqttService.connect(node);
+            delay(10000);
+        }
+    }
+
     if (!wifiService.connected() || !mqttService.connected())
     {
         wifiService.setupAP(node);
